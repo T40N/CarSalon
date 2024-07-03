@@ -23,7 +23,7 @@ services:
 
   test:
     build: .
-    command: sh -c "export PYTHONPATH=$PYTHONPATH:/app && pytest"
+    command: sh -c "export PYTHONPATH=$PYTHONPATH:/app && pytest --cov=."
     environment:
       FLASK_APP: app
       FLASK_ENV: development
