@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: salon
+      POSTGRES_PASSWORD: salon
+      POSTGRES_DB: salon_vehicle
+    ports:
+      - "5432:5432"
+
+  migrate:
+    build: .
+    command: sh -c "rm -rf migrations && flask db init && flask db migrate -m 'initial migration' && flask db upgrade"
+    environment:
+      FLASK_APP: app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://salon:salon@db:5432/salon_vehicle
+    depends_on:
+      - db
+
+  test:
+    build: .
+    command: sh -c "export PYTHONPATH=$PYTHONPATH:/app && pytest"
+    environment:
+      FLASK_APP: app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://salon:salon@db:5432/salon_vehicle
+    depends_on:
+      - db
+      - migrate
+
+  web:
+    build: .
+    command: flask run --host=0.0.0.0 --port=5001
+    environment:
+      FLASK_APP: app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://salon:salon@db:5432/salon_vehicle
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+      - migrate
